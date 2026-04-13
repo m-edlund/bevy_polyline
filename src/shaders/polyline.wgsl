@@ -14,6 +14,7 @@ struct PolylineMaterial {
     color: vec4<f32>,
     depth_bias: f32,
     width: f32,
+    plane_cut: vec4<f32>,
 };
 
 @group(2) @binding(0)
@@ -28,6 +29,7 @@ struct Vertex {
 struct VertexOutput {
     @builtin(position) clip_position: vec4<f32>,
     @location(0) color: vec4<f32>,
+    @location(1) world_position: vec2<f32>,
 };
 
 @vertex
@@ -91,7 +93,8 @@ fn vertex(vertex: Vertex) -> VertexOutput {
         depth = depth * exp2(-material.depth_bias * log2(clip.w / depth - epsilon));
     }
 
-    return VertexOutput(vec4(clip.w * ((2.0 * pt) / resolution - 1.0), depth, clip.w), color);
+    let world_position = polyline.model * vec4(position, 1.0);
+    return VertexOutput(vec4(clip.w * ((2.0 * pt) / resolution - 1.0), depth, clip.w), color, world_position);
 }
 
 fn clip_near_plane(a: vec4<f32>, b: vec4<f32>) -> vec4<f32> {
@@ -109,6 +112,18 @@ fn clip_near_plane(a: vec4<f32>, b: vec4<f32>) -> vec4<f32> {
 struct FragmentInput {
     @location(0) color: vec4<f32>,
 };
+
+fn plane_cut_need_discard(position: vec3<f32>, plane: vec4<f32>) -> bool {
+    // --- 核心：平面切割逻辑 ---
+    // 计算片段的世界坐标到平面的有符号距离 (signed distance)
+    // 平面方程: dot(plane.xyz, position) - plane.w = 0
+    let distance = dot(in.world_position.xyz, my_extended_material.plane.xyz) - my_extended_material.plane.w;
+    // 如果距离小于0，意味着该点在平面的“切除”侧，丢弃该片段
+    if distance < 0.0 {
+        return true;
+    }
+    return false;
+}
 
 @fragment
 fn fragment(in: FragmentInput) -> @location(0) vec4<f32> {

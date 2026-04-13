@@ -36,6 +36,7 @@ fn setup(
             perspective: false,
             // Bias the line toward the camera so the line at the cube-plane intersection is visible
             depth_bias: -0.0002,
+            plane_cut: Vec4::new(0.0, 0.0, 1.0, 0.0),
         })),
         ..Default::default()
     });

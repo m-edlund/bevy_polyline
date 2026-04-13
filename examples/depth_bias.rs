@@ -82,6 +82,7 @@ fn setup(
             color: RED.into(),
             depth_bias: -1.0,
             perspective: false,
+            plane_cut: Vec4::new(0.0, 0.0, 1.0, 0.0),
         })),
         ..Default::default()
     });
@@ -99,6 +100,7 @@ fn setup(
                 color: Color::hsl((bias + 1.0) / 2.0 * 270.0, 1.0, 0.5).to_linear(),
                 depth_bias: bias,
                 perspective: false,
+                plane_cut: Vec4::new(0.0, 0.0, 1.0, 0.0),
             })),
             ..Default::default()
         });

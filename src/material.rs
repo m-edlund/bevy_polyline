@@ -62,6 +62,8 @@ pub struct PolylineMaterial {
     ///
     /// Note that `depth_bias` **does not** interact with this in any way.
     pub perspective: bool,
+    /// plane cut
+    pub plane_cut: Vec4,
 }
 
 impl Default for PolylineMaterial {
@@ -71,6 +73,7 @@ impl Default for PolylineMaterial {
             color: Color::WHITE.to_linear(),
             depth_bias: 0.0,
             perspective: false,
+            plane_cut: Vec4::new(0.0, 0.0, 1.0, 0.0), // Z 平面
         }
     }
 }
@@ -103,6 +106,7 @@ pub struct PolylineMaterialUniform {
     pub color: Vec4,
     pub depth_bias: f32,
     pub width: f32,
+    pub plane_cut: Vec4,
 }
 
 pub struct GpuPolylineMaterial {
@@ -133,6 +137,7 @@ impl RenderAsset for GpuPolylineMaterial {
             width: polyline_material.width,
             depth_bias: polyline_material.depth_bias,
             color: polyline_material.color.to_f32_array().into(),
+            plane_cut: polyline_material.plane_cut,
         };
 
         let mut buffer = UniformBuffer::from(value);
